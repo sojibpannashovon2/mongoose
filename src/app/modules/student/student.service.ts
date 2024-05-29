@@ -22,12 +22,22 @@ const createStudentDatabase = async (studentData: TStudent) => {
   return result
 }
 
+//?Get All data from mongodb
 const getStudentData = async () => {
   const result = await Student.find()
   return result
 }
+
+//? get single data from mongodb
 const getSingleStudentData = async (id: string) => {
-  const result = await Student.findOne({ id })
+  // const result = await Student.findOne({ id })
+  //? Here I have to apply aggregation Query
+  const result = await Student.aggregate([{ $match: { id: id } }])
+  return result
+}
+//? Delete single data from MongoDb
+const deleteStudentData = async (id: string) => {
+  const result = await Student.updateOne({ id }, { isDeleted: true })
   return result
 }
 
@@ -35,4 +45,5 @@ export const StudentService = {
   createStudentDatabase,
   getStudentData,
   getSingleStudentData,
+  deleteStudentData,
 }

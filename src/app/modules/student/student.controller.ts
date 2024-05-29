@@ -2,6 +2,7 @@ import { Response, Request } from 'express'
 
 import { StudentService } from './student.service'
 import studentValidationSchema from './student.validation'
+import { any } from 'zod'
 
 const createStudent = async (req: Request, res: Response) => {
   try {
@@ -40,8 +41,12 @@ const getAllStudentData = async (req: Request, res: Response) => {
       message: 'Data Retrive Successfully',
       data: result,
     })
-  } catch (error) {
-    console.log(error)
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong !!',
+      error: err,
+    })
   }
 }
 
@@ -56,8 +61,32 @@ const getSingleData = async (req: Request, res: Response) => {
       message: 'Single Data Retrive Successfully',
       data: result,
     })
-  } catch (err) {
-    console.log(err)
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong !!',
+      error: err,
+    })
+  }
+}
+
+const deleteDataFromDatabase = async (req: Request, res: Response) => {
+  try {
+    const { studentId } = req.params
+
+    const result = await StudentService.deleteStudentData(studentId)
+
+    res.status(200).json({
+      success: true,
+      message: 'Data Deleted Successfully',
+      data: result,
+    })
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong !!',
+      error: err,
+    })
   }
 }
 
@@ -65,4 +94,5 @@ export const StudentController = {
   createStudent,
   getAllStudentData,
   getSingleData,
+  deleteDataFromDatabase,
 }

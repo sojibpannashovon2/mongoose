@@ -44,6 +44,7 @@ export type TStudent = {
   phoneNumber?: string
   guardian: TGuardian
   localGurdian: TLocalGuardian
+  isDeleted: Boolean
 }
 
 //! Statics method

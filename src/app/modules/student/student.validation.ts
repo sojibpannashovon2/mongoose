@@ -73,7 +73,7 @@ const addressSchema = z
 // Student schema
 const studentSchema = z.object({
   id: z.string().min(1, MIN_LENGTH_ERROR),
-  password: z.string().max(20, MIN_LENGTH_ERROR),
+  password: z.string().max(20, MAX_LENGTH_ERROR),
   name: userNameSchema,
   age: z.string().min(1, MIN_LENGTH_ERROR).max(20, MAX_LENGTH_ERROR),
   gender: z.enum(['male', 'female', 'other'], {
@@ -93,6 +93,7 @@ const studentSchema = z.object({
   phoneNumber: z.string().min(1, MIN_LENGTH_ERROR).optional(),
   guardian: guardianSchema,
   localGurdian: localGuardianSchema,
+  isDeleted: z.boolean(),
 })
 
 export default studentSchema

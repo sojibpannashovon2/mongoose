@@ -64,54 +64,65 @@ const localGurdianSchema = new Schema<TLocalGuardian>({
   job: { type: String, required: true },
 })
 
-const studentSchema = new Schema<TStudent>({
-  id: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  name: {
-    type: userNameSchema,
-    required: true,
-  },
+const studentSchema = new Schema<TStudent>(
+  {
+    id: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    name: {
+      type: userNameSchema,
+      required: true,
+    },
 
-  age: { type: String, required: true },
-  gender: {
-    type: String,
-    enum: {
-      values: ['male', 'female', 'other'],
-      message: `The Gender fill will be one of the "male", "female" or "others" `,
+    age: { type: String, required: true },
+    gender: {
+      type: String,
+      enum: {
+        values: ['male', 'female', 'other'],
+        message: `The Gender fill will be one of the "male", "female" or "others" `,
+      },
+      required: true,
     },
-    required: true,
-  },
-  email: { type: String, required: true },
-  enrolledCourses: { type: String, required: true },
-  enrollmentDate: { type: String, required: true },
-  isActive: {
-    type: String,
-    enum: ['active', 'inactive'],
-    default: 'active',
-  },
-  bloodGroup: {
-    type: String,
-    enum: {
-      values: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
-      message: `{VALUE} is not vaild`,
+    email: { type: String, required: true },
+    enrolledCourses: { type: String, required: true },
+    enrollmentDate: { type: String, required: true },
+    isActive: {
+      type: String,
+      enum: ['active', 'inactive'],
+      default: 'active',
+    },
+    bloodGroup: {
+      type: String,
+      enum: {
+        values: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        message: `{VALUE} is not vaild`,
+      },
+    },
+    address: {
+      street: { type: String, required: true },
+      city: { type: String, required: true },
+      state: { type: String, required: true },
+      postalCode: { type: String, required: true },
+    },
+    phoneNumber: { type: String, required: true },
+    guardian: {
+      type: guardianSchema,
+      required: true,
+    },
+    localGurdian: {
+      type: localGurdianSchema,
+      required: true,
+    },
+    isDeleted: {
+      type: Boolean,
+      default: false,
     },
   },
-  address: {
-    street: { type: String, required: true },
-    city: { type: String, required: true },
-    state: { type: String, required: true },
-    postalCode: { type: String, required: true },
+  {
+    toJSON: {
+      virtuals: true,
+    },
   },
-  phoneNumber: { type: String, required: true },
-  guardian: {
-    type: guardianSchema,
-    required: true,
-  },
-  localGurdian: {
-    type: localGurdianSchema,
-    required: true,
-  },
-})
+)
 
 //? pre save middlware/  hook: wil work on
 //? create() , save() before new data create
@@ -125,11 +136,38 @@ studentSchema.pre('save', async function (next) {
 
 //?post save middleware / hook
 
-studentSchema.post('save', function () {
-  console.log(this, `Post hook: after saveing previous data`)
+studentSchema.post('save', function (doc, next) {
+  // console.log(this, `Post hook: after saveing previous data`)
+  doc.password = ''
+  next()
 })
 
-//! statics Method
+//? Query Model Middleware. Here I have implement query
+
+studentSchema.pre('find', function (next) {
+  this.find({ isDeleted: { $ne: true } })
+  next()
+})
+
+studentSchema.pre('findOne', function (next) {
+  this.find({ isDeleted: { $ne: true } })
+  next()
+})
+
+//? Here I have apply the aggregation logic
+
+studentSchema.pre('aggregate', function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } })
+  next()
+})
+
+//? Vartual Mongoose
+
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`
+})
+
+//* statics Method
 
 studentSchema.statics.isUserExists = async function (id: string) {
   const existsUser = await Student.findOne({ id: id })

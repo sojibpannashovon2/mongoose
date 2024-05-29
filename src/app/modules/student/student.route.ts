@@ -8,4 +8,6 @@ router.get('/', StudentController.getAllStudentData)
 
 router.get('/:studentId', StudentController.getSingleData)
 
+router.delete('/:studentId', StudentController.deleteDataFromDatabase)
+
 export const StudentRoute = router
