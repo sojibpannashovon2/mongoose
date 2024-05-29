@@ -1,14 +1,19 @@
 import { Response, Request } from 'express'
 
 import { StudentService } from './student.service'
+import studentValidationSchema from './student.validation'
 
 const createStudent = async (req: Request, res: Response) => {
   try {
     const { student: studentData } = req.body
 
+    //! import zod validatioin data
+
+    const zodValidation = studentValidationSchema.parse(studentData)
+
     //?Will call the service functon to send this data
 
-    const result = await StudentService.createStudentDatabase(studentData)
+    const result = await StudentService.createStudentDatabase(zodValidation)
 
     //? send response to route
 
@@ -17,8 +22,12 @@ const createStudent = async (req: Request, res: Response) => {
       message: 'Student is created Successfully',
       data: result,
     })
-  } catch (error) {
-    console.log(error)
+  } catch (err: any) {
+    res.status(500).json({
+      success: false,
+      message: err.message || 'Something went wrong !!',
+      error: err,
+    })
   }
 }
 
